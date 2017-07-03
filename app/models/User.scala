@@ -13,7 +13,8 @@ import OWritesOps._
   * Created by chenshijue on 2017/6/29.
   */
 
-case class User(_id: Option[String], name: String, password: Option[String], mobile: String, email: Option[String]){
+case class User(var _id: Option[String], name: Option[String], var password: Option[String], mobile: Option[String],
+                email: Option[String]){
     val created = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date)
 }
 
@@ -21,9 +22,9 @@ object User {
 
     implicit val userReads: Reads[User] = (
         (JsPath \ "_id").readNullable[String] and
-            (JsPath \ "name").read[String](minLength[String](4) keepAnd maxLength[String](20)) and
+            (JsPath \ "name").readNullable[String](minLength[String](4) keepAnd maxLength[String](20)) and
             (JsPath \ "password").readNullable[String](minLength[String](6) keepAnd maxLength[String](25)) and
-            (JsPath \ "mobile").read[String](minLength[String](4) keepAnd maxLength[String](20)) and
+            (JsPath \ "mobile").readNullable[String](minLength[String](4) keepAnd maxLength[String](20)) and
             (JsPath \ "email").readNullable[String](email)
     )(User.apply _)
 

@@ -16,9 +16,7 @@ trait Repository[T] {
 
     def removeAll()(implicit ec: ExecutionContext): Future[WriteResult]
 
-    def edit(selector: JsObject, item: T)(implicit ec: ExecutionContext): Future[WriteResult]
-
-    def update(selector: JsObject, update: JsObject)(implicit ec: ExecutionContext): Future[WriteResult]
+    def update(item: T)(implicit ec: ExecutionContext): Future[WriteResult]
 
     def findOne(selector: JsObject)(implicit ec: ExecutionContext): Future[Option[JsObject]]
 

@@ -43,51 +43,36 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
             user => {
                 userRepository.add(user).map(
-                    result => if (result._1.hasErrors) InternalServerError(result._1.errmsg.getOrElse(""))
+                    result => if (result._1.inError) InternalServerError(result._1.errmsg.getOrElse(""))
                         else Ok(User.userOWrites.writes(result._2) - "password")
                 )
             }
         )
     }
 
-    def editUser = LogAction.async { implicit request =>
+    def updateUser = LogAction.async { implicit request =>
         val bodyJson = request.body.asJson.getOrElse(Json.obj())
         User.userReads.reads(bodyJson).fold(
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
-            user => user._id match {
-                case Some(oid) => userRepository.edit(Json.obj("_id" -> oid), user).map(
-                            result => if (result.hasErrors) InternalServerError(result.errmsg.getOrElse(""))
-                            else Ok(Json.toJson("update success"))
-                        )
-                case _ => Future(BadRequest("Parameter invalid"))
-
+            user => {
+                userRepository.update(user).map(
+                    result => if (result.inError) InternalServerError(result.errmsg.getOrElse(""))
+                    else Ok(Json.toJson("update success"))
+                )
             }
         )
     }
 
-    def updateUser = LogAction.async { implicit request =>
-        val bodyJson = request.body.asJson.getOrElse(Json.obj())
-        (bodyJson \ "_id").asOpt[String] match {
-            case Some(oid) => {
-                userRepository.update(Json.obj("_id" -> oid), Json.obj("$set" -> bodyJson)).map(
-                    result => if (result.hasErrors) InternalServerError(result.errmsg.getOrElse(""))
-                    else Ok(Json.toJson("update success"))
-                )
-            }
-            case None => Future(BadRequest("Parameter invalid"))
-        }
-    }
-
     def removeAllUser = LogAction.async {
         userRepository.removeAll().map(
-            result => if (result.hasErrors) InternalServerError(result.errmsg.getOrElse(""))
+            result => if (result.inError) InternalServerError(result.errmsg.getOrElse(""))
             else Ok(Json.toJson("remove all success"))
         )
     }
 
     def removeUser(id: String) = LogAction.async {
         userRepository.remove(Json.obj("_id" -> id)).map(
-            result => if (result.hasErrors) InternalServerError(result.errmsg.getOrElse(""))
+            result => if (result.inError) InternalServerError(result.errmsg.getOrElse(""))
             else Ok(Json.toJson("remove success"))
         )
     }
