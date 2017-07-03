@@ -78,6 +78,13 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
         }
     }
 
+    def removeAllUser = LogAction.async {
+        userRepository.removeAll().map(
+            result => if (result.hasErrors) InternalServerError(result.errmsg.getOrElse(""))
+            else Ok(Json.toJson("remove all success"))
+        )
+    }
+
     def removeUser(id: String) = LogAction.async {
         userRepository.remove(Json.obj("_id" -> id)).map(
             result => if (result.hasErrors) InternalServerError(result.errmsg.getOrElse(""))

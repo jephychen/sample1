@@ -34,6 +34,8 @@ class UserRepository(collection: JSONCollection) extends Repository[User] {
     override def remove(selector: JsObject)(implicit ec: ExecutionContext): Future[WriteResult] =
         collection.remove(selector)
 
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = collection.remove(Json.obj())
+
     override def edit(selector: JsObject, item: User)(implicit ec: ExecutionContext): Future[WriteResult] =
         collection.update(selector, item, upsert = false)
 

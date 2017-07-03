@@ -22,6 +22,8 @@ class UserRouter @Inject() (controller: UserController) extends SimpleRouter {
             controller.editUser
         case PATCH(p"/") =>
             controller.updateUser
+        case DELETE(p"/") =>
+            controller.removeAllUser
         case DELETE(p"/$id") =>
             controller.removeUser(id: String)
     }
