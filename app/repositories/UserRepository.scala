@@ -43,9 +43,9 @@ class UserRepository(collection: JSONCollection) extends Repository[User] {
     override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = collection.remove(Json.obj())
 
     override def update(item: User)(implicit ec: ExecutionContext): Future[WriteResult] = {
-        val encrypPassword = BCrypt.hashpw(item.password.getOrElse(""), BCrypt.gensalt())
         item._id match {
             case Some(oid) => {
+                val encrypPassword = BCrypt.hashpw(item.password.getOrElse(""), BCrypt.gensalt())
                 item.password = Some(encrypPassword)
             }
             case None => {
