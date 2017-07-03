@@ -10,7 +10,8 @@ scalaVersion := "2.11.11"
 routesGenerator := InjectedRoutesGenerator
 
 libraryDependencies ++= Seq(
-    "org.reactivemongo" %% "play2-reactivemongo" % "0.11.11-play24"
+    "org.reactivemongo" %% "play2-reactivemongo" % "0.11.11-play24",
+    "org.mindrot" % "jbcrypt" % "0.3m"
 )
 
 // Adds additional packages into Twirl

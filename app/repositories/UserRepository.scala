@@ -11,6 +11,7 @@ import play.modules.reactivemongo.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import models.User
+import org.mindrot.jbcrypt.BCrypt
 
 /**
   * Created by chenshijue on 2017/6/30.
@@ -18,11 +19,15 @@ import models.User
 class UserRepository(collection: JSONCollection) extends Repository[User] {
 
     override def add(item: User)(implicit ec: ExecutionContext): Future[(WriteResult, User)] = {
+        val encrypPassword = BCrypt.hashpw(item.password.getOrElse(""), BCrypt.gensalt())
         val user = item._id match {
-            case Some(oid) => User(item._id, item.name, item.password, item.mobile, item.email)
-            case None => User(Some(BSONObjectID.generate.stringify), item.name, item.password,
+            case Some(oid) => {
+                User(item._id, item.name, Some(encrypPassword), item.mobile, item.email)
+            }
+            case None => User(Some(BSONObjectID.generate.stringify), item.name, Some(encrypPassword),
                 item.mobile, item.email)
         }
+
         collection.update(Json.obj("_id" -> user._id), user, upsert = true).map(result => (result, user))
     }
 
