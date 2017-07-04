@@ -2,7 +2,6 @@ package controllers
 
 import javax.inject._
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import libs.{JwtHelper, LogAction}
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Controller
