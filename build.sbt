@@ -11,7 +11,8 @@ routesGenerator := InjectedRoutesGenerator
 
 libraryDependencies ++= Seq(
     "org.reactivemongo" %% "play2-reactivemongo" % "0.11.11-play24",
-    "org.mindrot" % "jbcrypt" % "0.3m"
+    "org.mindrot" % "jbcrypt" % "0.3m",
+    "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5"
 )
 
 // Adds additional packages into Twirl

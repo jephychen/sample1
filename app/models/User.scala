@@ -13,8 +13,19 @@ import OWritesOps._
   * Created by chenshijue on 2017/6/29.
   */
 
+object UserRole {
+
+    //普通用户
+    val common = "common"
+
+    //管理员
+    val admin = "admin"
+
+}
+
 case class User(var _id: Option[String], name: Option[String], var password: Option[String], mobile: Option[String],
                 email: Option[String]){
+    var role = UserRole.common
     val created = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date)
 }
 
@@ -28,6 +39,7 @@ object User {
             (JsPath \ "email").readNullable[String](email)
     )(User.apply _)
 
-    implicit val userOWrites: OWrites[User] = Json.writes[User].addField("created", _.created)
+    implicit val userOWrites: OWrites[User] = Json.writes[User].addField("role", _.role).
+        addField("created", _.created)
 
 }

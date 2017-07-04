@@ -41,8 +41,7 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
         val bodyJson = request.body.asJson.getOrElse(Json.obj())
         User.userReads.reads(bodyJson).fold(
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
-            user => {
-                userRepository.add(user).map(
+            user => { userRepository.add(user).map(
                     result => if (result._1.inError) InternalServerError(result._1.errmsg.getOrElse(""))
                         else Ok(User.userOWrites.writes(result._2) - "password")
                 )
@@ -54,8 +53,7 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
         val bodyJson = request.body.asJson.getOrElse(Json.obj())
         User.userReads.reads(bodyJson).fold(
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
-            user => {
-                userRepository.update(user).map(
+            user => { userRepository.update(user).map(
                     result => if (result.inError) InternalServerError(result.errmsg.getOrElse(""))
                     else Ok(Json.toJson("update success"))
                 )
