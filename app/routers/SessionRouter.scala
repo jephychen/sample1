@@ -13,5 +13,6 @@ import play.api.routing.sird._
 class SessionRouter @Inject() (controller: SessionController) extends SimpleRouter {
     override def routes: Routes = {
         case POST(p"/") => controller.login
+        case DELETE(p"/") => controller.logout
     }
 }

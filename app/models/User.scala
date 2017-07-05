@@ -21,6 +21,9 @@ object UserRole {
     //管理员
     val admin = "admin"
 
+    def authCommonList = List(common, admin)
+
+    def authAdminList = List(admin)
 }
 
 case class User(var _id: Option[String], name: Option[String], var password: Option[String], mobile: Option[String],
