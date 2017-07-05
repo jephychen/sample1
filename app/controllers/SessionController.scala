@@ -33,6 +33,7 @@ class SessionController @Inject() (val reactiveMongoApi: ReactiveMongoApi) exten
                     case Some(userObj) => {
                         val _password = userObj.value.getOrElse("password", JsString("")).as[String]
                         val isValid = BCrypt.checkpw(user.password.getOrElse(""), _password)
+
                         if (isValid){
                             val _name = userObj.value.getOrElse("name", JsString("default name")).as[String]
                             val _mobile = userObj.value.getOrElse("mobile", JsString("")).as[String]
@@ -42,6 +43,7 @@ class SessionController @Inject() (val reactiveMongoApi: ReactiveMongoApi) exten
                             Forbidden("Password error")
                         }
                     }
+
                     case None => Forbidden("User can't found")
                 }
                 case None => Future{ BadRequest("Parameter invalid, no mobile found")}
