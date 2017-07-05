@@ -2,6 +2,7 @@ package libs
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 
+import scala.util.{Failure, Success}
 import scala.util.Try
 
 /**
@@ -9,15 +10,17 @@ import scala.util.Try
   */
 
 case class JwtValidateErrorException() extends Exception
+case class JwtExpireErrorException() extends Exception
 
 object JwtHelper {
     val algorithm = "HS256"
 
-    val key = """43hn%6l3$jkh"""
+    final val key = """43hn%6l3$jkh"""
 
     def encode(body: Map[String, Any]): String = {
         val header = JwtHeader("HS256")
-        val claimSet = JwtClaimsSet(body)
+        val bodyExp = body + ("exp" -> (System.currentTimeMillis() + 30 * 60 * 1000))
+        val claimSet = JwtClaimsSet(bodyExp)
         JsonWebToken(header, claimSet, key)
     }
 
@@ -31,10 +34,21 @@ object JwtHelper {
         jwt match {
             case JsonWebToken(_header, _claim, signature) => {
                 val isValid = JsonWebToken.validate(jwt, key)
-                if (isValid) _claim.asSimpleMap
-                else throw new JwtValidateErrorException
+                if (isValid){
+                    val result = _claim.asSimpleMap
+                    result match {
+                        case Success(body) => {
+                            body.get("exp") match {
+                                case Some(exp) => if (System.currentTimeMillis() > exp.toLong)
+                                    Failure(new JwtExpireErrorException) else result
+                                case None => Failure(new JwtExpireErrorException)
+                            }
+                        }
+                    }
+                }
+                else Failure(new JwtValidateErrorException)
             }
-            case x => throw new JwtValidateErrorException
+            case x => Failure(new JwtValidateErrorException)
         }
     }
 }

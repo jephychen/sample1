@@ -24,17 +24,23 @@ object BaseAction extends ActionBuilder[Request] {
 
     def authInvoke[A](request: Request[A], block: (Request[A] => Future[Result]), roleList: List[String]): Future[Result] = {
         val jwtOpt = request.session.get("jwt")
-        if (!jwtOpt.isDefined) return Future(Unauthorized("You don't have the permission"))
+        if (!jwtOpt.isDefined) return Future(Unauthorized("Please login first"))
 
         JwtHelper.verifyAndDecode(jwtOpt.get) match {
             case Success(jwtBody) => {
                 jwtBody.get("role") match {
                     case Some(role) => if (roleList.contains(role))
-                        block(request) else Future(Unauthorized("You don't have the permission"))
-                    case None => Future(Unauthorized("You don't have the permission"))
+                        block(request) else Future(Unauthorized("Your role don't have the permission"))
+                    case None => Future(Unauthorized("Get role info error"))
                 }
             }
-            case Failure(e) => Future(Unauthorized("You don't have the permission"))
+            case Failure(e) => {
+                e match {
+                    case JwtExpireErrorException() => Future(Unauthorized("Please login first").
+                        withSession(request.session - "jwt"))
+                    case JwtValidateErrorException() => Future(Unauthorized("Your session has been tampered"))
+                }
+            }
         }
     }}
 

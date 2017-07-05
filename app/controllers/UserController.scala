@@ -24,7 +24,7 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
 
     val userRepository = new UserRepository(reactiveMongoApi.db.collection[JSONCollection]("users"))
 
-    def getUsers = AuthAdminAction.async {
+    def getUsers = AuthCommonAction.async {
         userRepository.find(Json.obj()).map(users => {
                 Ok(Json.toJson(for (user <- users) yield user - "password"))
             })

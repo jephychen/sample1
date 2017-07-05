@@ -54,7 +54,7 @@ class SessionController @Inject() (val reactiveMongoApi: ReactiveMongoApi) exten
         )
     }
 
-    def logout = AuthCommonAction{ implicit request =>
+    def logout = BaseAction{ implicit request =>
         Ok("Successful logout").withSession(request.session - "jwt")
     }
 }
