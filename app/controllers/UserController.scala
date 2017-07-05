@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 
-import libs.LogAction
+import libs.{AuthAdminAction, AuthCommonAction, BaseAction}
 import play.api.mvc._
 import models.User
 import play.api.libs.json.Json
@@ -24,20 +24,20 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
 
     val userRepository = new UserRepository(reactiveMongoApi.db.collection[JSONCollection]("users"))
 
-    def getUsers = LogAction.async {
+    def getUsers = AuthCommonAction.async {
         userRepository.find(Json.obj()).map(users => {
                 Ok(Json.toJson(for (user <- users) yield user - "password"))
             })
     }
 
-    def getUser(id: String) = LogAction.async {
+    def getUser(id: String) = AuthCommonAction.async {
         userRepository.findOne(Json.obj("_id" -> id)).map{
                 case Some(user) => Ok(user - "password")
                 case None => Ok("No result for " + id)
             }
     }
 
-    def createUser = LogAction.async { implicit request =>
+    def createUser = BaseAction.async { implicit request =>
         val bodyJson = request.body.asJson.getOrElse(Json.obj())
         User.userReads.reads(bodyJson).fold(
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
@@ -49,7 +49,7 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
         )
     }
 
-    def updateUser = LogAction.async { implicit request =>
+    def updateUser = AuthCommonAction.async { implicit request =>
         val bodyJson = request.body.asJson.getOrElse(Json.obj())
         User.userReads.reads(bodyJson).fold(
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
@@ -61,14 +61,14 @@ class UserController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends 
         )
     }
 
-    def removeAllUser = LogAction.async {
+    def removeAllUser = AuthAdminAction.async {
         userRepository.removeAll().map(
             result => if (result.inError) InternalServerError(result.errmsg.getOrElse(""))
             else Ok(Json.toJson("remove all success"))
         )
     }
 
-    def removeUser(id: String) = LogAction.async {
+    def removeUser(id: String) = AuthAdminAction.async {
         userRepository.remove(Json.obj("_id" -> id)).map(
             result => if (result.inError) InternalServerError(result.errmsg.getOrElse(""))
             else Ok(Json.toJson("remove success"))

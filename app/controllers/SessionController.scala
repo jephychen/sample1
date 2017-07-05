@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 
-import libs.{JwtHelper, LogAction}
+import libs._
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Controller
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
@@ -24,7 +24,7 @@ class SessionController @Inject() (val reactiveMongoApi: ReactiveMongoApi) exten
 
     val userRepository = new UserRepository(reactiveMongoApi.db.collection[JSONCollection]("users"))
 
-    def login = LogAction.async{ implicit request =>
+    def login = BaseAction.async{ implicit request =>
         val bodyJson = request.body.asJson.getOrElse(Json.obj())
         User.userReads.reads(bodyJson).fold(
             invalid => Future{ BadRequest("Parameter invalid. " + invalid.mkString(";"))},
@@ -38,18 +38,23 @@ class SessionController @Inject() (val reactiveMongoApi: ReactiveMongoApi) exten
                             val _name = userObj.value.getOrElse("name", JsString("default name")).as[String]
                             val _mobile = userObj.value.getOrElse("mobile", JsString("")).as[String]
                             val _role = userObj.value.getOrElse("role", JsString("common")).as[String]
-                            Ok(JwtHelper.encode(Map("name" -> _name, "mobile" -> _mobile, "role" -> _role)))
+                            val jwt = JwtHelper.encode(Map("name" -> _name, "mobile" -> _mobile, "role" -> _role))
+                            Ok("Successful login").withSession(request.session + ("jwt" -> jwt))
                         }else {
-                            Forbidden("Password error")
+                            Forbidden("Password error").withSession(request.session - "jwt")
                         }
                     }
 
-                    case None => Forbidden("User can't found")
+                    case None => Forbidden("User can't found").withSession(request.session - "jwt")
                 }
-                case None => Future{ BadRequest("Parameter invalid, no mobile found")}
+                case None => Future{ BadRequest("Parameter invalid, no mobile found").
+                    withSession(request.session - "jwt")}
             }
             }
         )
     }
 
+    def logout = AuthCommonAction{ implicit request =>
+        Ok("Successful logout").withSession(request.session - "jwt")
+    }
 }
