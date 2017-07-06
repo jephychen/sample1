@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject._
 
+import authentications._
 import libs._
 import play.api.libs.json._
 import play.api.mvc._
@@ -37,6 +38,7 @@ class SessionController @Inject() (val reactiveMongoApi: ReactiveMongoApi) exten
     }
 
     private def doLogin(user: User, request: Request[AnyContent]): Future[Result] = {
+        Seq
         user.mobile match {
             case Some(phone) => userRepository.findOne(Json.obj("mobile" -> phone)).map{
                 case Some(userObj) => {

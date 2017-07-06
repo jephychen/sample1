@@ -1,4 +1,4 @@
-package libs
+package authentications
 
 import models.UserRole
 import play.api.mvc._

@@ -1,8 +1,7 @@
-package libs
+package authentications
 
 import models.UserRole
-import play.api.mvc.ActionBuilder
-import play.api.mvc._
+import play.api.mvc.{ActionBuilder, _}
 
 import scala.concurrent.Future
 
@@ -10,6 +9,7 @@ import scala.concurrent.Future
   * Created by chenshijue on 2017/7/5.
   */
 object AuthCommonAction extends ActionBuilder[Request]{
+
     override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
         BaseAction.logging(request)
         BaseAction.authInvoke(request, block, UserRole.authCommonList)
