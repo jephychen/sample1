@@ -1,7 +1,7 @@
 package repositories
 
 import play.api.libs.json._
-import reactivemongo.api.commands.{DefaultWriteResult, WriteError, WriteResult}
+import reactivemongo.api.commands._
 
 import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.api.ReadPreference
