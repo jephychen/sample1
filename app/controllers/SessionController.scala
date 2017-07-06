@@ -3,7 +3,7 @@ package controllers
 import javax.inject._
 
 import libs._
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.play.json.collection.JSONCollection

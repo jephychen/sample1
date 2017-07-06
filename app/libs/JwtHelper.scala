@@ -1,6 +1,6 @@
 package libs
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
+import authentikat.jwt._
 
 import scala.util.{Failure, Success}
 import scala.util.Try
@@ -32,23 +32,25 @@ object JwtHelper {
 
     def verifyAndDecode(jwt: String): Try[Map[String, String]] = {
         jwt match {
-            case JsonWebToken(_header, _claim, signature) => {
-                val isValid = JsonWebToken.validate(jwt, key)
-                if (isValid){
-                    val result = _claim.asSimpleMap
-                    result match {
-                        case Success(body) => {
-                            body.get("exp") match {
-                                case Some(exp) => if (System.currentTimeMillis() > exp.toLong)
-                                    Failure(new JwtExpireErrorException) else result
-                                case None => Failure(new JwtExpireErrorException)
-                            }
-                        }
-                    }
-                }
-                else Failure(new JwtValidateErrorException)
-            }
+            case JsonWebToken(_header, _claim, signature) => doVerify(jwt, _claim)
             case x => Failure(new JwtValidateErrorException)
         }
+    }
+
+    private def doVerify(jwt: String, claim: JwtClaimsSetJValue ): Try[Map[String, String]] = {
+        val isValid = JsonWebToken.validate(jwt, key)
+        if (isValid){
+            val result = claim.asSimpleMap
+            result match {
+                case Success(body) => {
+                    body.get("exp") match {
+                        case Some(exp) => if (System.currentTimeMillis() > exp.toLong)
+                            Failure(new JwtExpireErrorException) else result
+                        case None => Failure(new JwtExpireErrorException)
+                    }
+                }
+            }
+        }
+        else Failure(new JwtValidateErrorException)
     }
 }
